@@ -148,6 +148,4 @@ def pdfdarkmode():
 
 
 if __name__ == "__main__":
-    mydict = mp_test()
-    print(mydict.keys())
-    print(mydict.values())
+    pdfdarkmode()
