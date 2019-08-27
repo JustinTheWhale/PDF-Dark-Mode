@@ -1,3 +1,24 @@
+#JustinMartinezCSUSB
+
+
+#pdfdarkmode_noGUI.py
+
+
+#Program that converts all of the .pdf files
+#in the same directory to have a "Dark mode"
+#to put less strain on your eyes :-)
+#Final file will be saved with the same name
+#but with "_darkmode.pdf" at the end
+
+
+#Things to note:
+#Might take a while depending on how large your .pdf(s) is/are
+#Only one function uses multiprocessing but other fuctions might 
+#be added later
+#The final file is much larger than the original file, but this
+#is to keep the quality intact.
+
+
 from pdf2image import convert_from_path
 from PyPDF2 import PdfFileMerger
 import multiprocessing as mp
@@ -6,16 +27,18 @@ import cv2
 import os
 
 
-
+#Function that converts the individual pages in a .pdf file 
+#to .png for easier pixel value manipulation. Returns a list of
+#.png files.
 def pdf_to_png(dpi_arg=300, thread_arg=1):
     arg_dict = locals()
-    dpi_count = arg_dict['dpi_arg']
-    threads = arg_dict['thread_arg']
+    dpi_count = arg_dict['dpi_arg'] #Grabbing values of the
+    threads = arg_dict['thread_arg'] #args to pass to convert_from_path.
     png_names = []
     page_count = 0
     for File in os.listdir("."):
         if File.endswith(".pdf"):
-                pages = convert_from_path(File, dpi=dpi_count, thread_count=threads)
+                pages = convert_from_path(File, dpi=dpi_count, thread_count=threads) #thread_count max is the number of cpus.
                 new_name = File[:-4]
                 for page in pages:
                     page.save('%s-page%d.png' % (new_name, pages.index(page)), 'PNG')
@@ -24,6 +47,8 @@ def pdf_to_png(dpi_arg=300, thread_arg=1):
     return png_names
 
 
+#Takes the list of .png's and inverts the color for each.
+#It's necessary because otherise black font wouldn't look right.
 def invert_color(pngs_white):
     for i in range(len(pngs_white)):
         image = cv2.imread(pngs_white[i])
@@ -31,6 +56,8 @@ def invert_color(pngs_white):
         cv2.imwrite(pngs_white[i], image_inverted)
         
 
+#Takes an inverted .png and converts all black pixels to grey.
+#Only takes one string at a time so that multiprocessing works.
 def black_to_grey(File):
     color_array = cv2.imread(File)
     length = (color_array.shape[0] - 1)
@@ -42,6 +69,7 @@ def black_to_grey(File):
     cv2.imwrite(File, color_array)
 
 
+#Returns a sorted list of darkmode .png files
 def darkmode_files():
     file_list = []
     for File in os.listdir("."):
@@ -50,6 +78,7 @@ def darkmode_files():
     return sorted(file_list)
 
 
+#Returns a list of index's for the get_groups(arg) function
 def get_start_end(darkmode_list, element):
     index_list = []
     tuple_list = []
@@ -59,8 +88,10 @@ def get_start_end(darkmode_list, element):
         if element in tuple_list[j][1]:
             index_list.append(tuple_list[j][0])
     return index_list
-    
 
+
+#Returns a list of grouped .png files. This so we dont
+#confuse the pages of two sparate .pdf files
 def get_groups (darkmode_list):
     group_list = []
     i = 0
@@ -74,18 +105,21 @@ def get_groups (darkmode_list):
     return group_list
 
 
+#Simple cleanup
 def remove_temp_pdfs():
     for File in os.listdir("."):
         if "temp_darkmode.pdf" in File:
             os.remove(File)
 
-
+#Simple cleanup
 def remove_pngs():
     for File in os.listdir("."):
         if File.endswith(".png"):
             os.remove(File)
 
 
+#Takes a list of darkmode .pdf pages and merges them into
+#a single .pdf file.
 def repack(darkmode_pdfs):
     for i in range(len(darkmode_pdfs)):
         merger = PdfFileMerger()        
@@ -95,6 +129,7 @@ def repack(darkmode_pdfs):
         merger.close()
 
 
+#Converts darkmode .png files to .pdf files
 def png_to_pdf(pngs_dark):
     for x in range(len(pngs_dark)):
         pdf = FPDF()
@@ -107,11 +142,17 @@ def png_to_pdf(pngs_dark):
     remove_temp_pdfs()
 
 
+#Simply making a list of lists to process for multiprocessing.
+#Size of the lists is determined by the number of cpus. This is so
+#that we dont more processes than cpus available. 
 def make_batches(process_list, cpus):
     batches = [process_list[i:i + cpus] for i in range(0, len(process_list), cpus)]
     return batches
 
 
+#Calls almost all of the funtions above and uses different Processes
+#for black_t0_grey(File) which results in a significant speedup over
+#only 1 process. 
 def multiProcess(cpus):
     temp_pngs = pdf_to_png(thread_arg=mp.cpu_count())
     invert_color(temp_pngs)
@@ -130,6 +171,7 @@ def multiProcess(cpus):
     png_to_pdf(temp_pngs)
 
 
+#If you sadly only have a single-core CPU, this is what is called.
 def singleProcess(cpus):
     temp_pngs = pdf_to_png(thread_arg=cpus)
     invert_color(temp_pngs)
@@ -139,6 +181,7 @@ def singleProcess(cpus):
     png_to_pdf(temp_pngs)
 
 
+#Simple main fuction.
 def pdfdarkmode():
     cpus = mp.cpu_count()
     if cpus == 1:
