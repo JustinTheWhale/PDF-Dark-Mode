@@ -30,20 +30,18 @@ import os
 #Function that converts the individual pages in a .pdf file 
 #to .png for easier pixel value manipulation. Returns a list of
 #.png files.
-def pdf_to_png(dpi_arg=300, thread_arg=1):
+def pdf_to_png(dpi_arg=175, thread_arg=1):
     arg_dict = locals()
     dpi_count = arg_dict['dpi_arg'] #Grabbing values of the
     threads = arg_dict['thread_arg'] #args to pass to convert_from_path.
     png_names = []
-    page_count = 0
     for File in os.listdir("."):
         if File.endswith(".pdf"):
-                pages = convert_from_path(File, dpi=dpi_count, thread_count=threads) #thread_count max is the number of cpus.
-                new_name = File[:-4]
-                for page in pages:
-                    page.save('%s-page%d.png' % (new_name, pages.index(page)), 'PNG')
-                    png_names.append('%s-page%d.png' % (new_name, pages.index(page)))
-                    page_count += 1
+            pages = convert_from_path(File, dpi=dpi_count, thread_count=threads) #thread_count max is the number of cpus.
+            new_name = File[:-4]
+            for page in pages:
+                page.save('%s-page%d.png' % (new_name, pages.index(page)), 'PNG')
+                png_names.append('%s-page%d.png' % (new_name, pages.index(page)))
     return png_names
 
 
@@ -150,9 +148,12 @@ def make_batches(process_list, cpus):
     return batches
 
 
-#Calls almost all of the funtions above and uses different Processes
-#for black_t0_grey(File) which results in a significant speedup over
-#only 1 process. 
+# Calls almost all of the funtions above and uses different Processes
+# for black_t0_grey(File) which results in a significant speedup over
+# only 1 process. The speedup is based on a cpu-cores/pages-to-process
+# ratio since it converts in batches.
+# For example:
+#               4-cores/4-pages = 1 core per page
 def multiProcess(cpus):
     temp_pngs = pdf_to_png(thread_arg=mp.cpu_count())
     invert_color(temp_pngs)
@@ -171,7 +172,8 @@ def multiProcess(cpus):
     png_to_pdf(temp_pngs)
 
 
-#If you sadly only have a single-core CPU, this is what is called.
+#If you sadly only have a single-core CPU, this is what is called
+#instead of the multiProcess() function
 def singleProcess(cpus):
     temp_pngs = pdf_to_png(thread_arg=cpus)
     invert_color(temp_pngs)
@@ -191,4 +193,4 @@ def pdfdarkmode():
 
 
 if __name__ == "__main__":
-    pdfdarkmode()
+    multiProcess()
