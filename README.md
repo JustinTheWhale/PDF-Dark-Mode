@@ -1,5 +1,6 @@
 # PDF-Dark-Mode-No-GUI-
 Same as GUI version but does not let you choose the directory, instead it converts all PDF's in the current directory
+
 Sick of getting your eyeballs burned out by white PDF's? Try this. 
 ________________________________________________________________________________
 
@@ -23,4 +24,4 @@ You then need to add the included folder "poppler-0.68.0/bin" to your Windows En
     
 # Usage
    
-   Once you have all of those modules simply run python "pdfdarkmode.py"
+   Once you have all of those modules simply run "python pdfdarkmode.py"
