@@ -152,8 +152,6 @@ def make_batches(process_list, cpus):
 # for black_t0_grey(File) which results in a significant speedup over
 # only 1 process. The speedup is based on a cpu-cores/pages-to-process
 # ratio since it converts in batches.
-# For example:
-#               4-cores/4-pages = 1 core per page
 def multiProcess(cpus):
     temp_pngs = pdf_to_png(thread_arg=mp.cpu_count())
     invert_color(temp_pngs)
