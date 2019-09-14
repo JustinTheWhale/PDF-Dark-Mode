@@ -25,3 +25,13 @@ You then need to add the included folder "poppler-0.68.0/bin" to your Windows En
 # Usage
    
    Once you have all of those modules simply run "python pdfdarkmode.py". Make sure you ave the PDF's you want to convert in the same directory.
+
+# Example
+
+Before
+
+![Before](GEW.PNG)
+
+After
+
+![After](GED.PNG)
