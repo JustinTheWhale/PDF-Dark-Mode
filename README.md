@@ -1,4 +1,4 @@
-# PDF-Dark-Mode-No-GUI-
+# PDF-Dark-Mode
 Same as GUI version but does not let you choose the directory, instead it converts all PDF's in the current directory
 
 Sick of getting your eyeballs burned out by white PDF's? Try this. 
