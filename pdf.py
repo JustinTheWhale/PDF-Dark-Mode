@@ -22,49 +22,47 @@
 from pdf2image import convert_from_path
 from PyPDF2 import PdfFileMerger
 import multiprocessing as mp
+from threading import Thread
 from fpdf import FPDF
 import cv2
 import os
 import time
-import parse
+from compare import speed
+import timeit
+from alive_progress import alive_bar, config_handler
+
+
+
 
 
 #Function that converts the individual pages in a .pdf file 
 #to .png for easier pixel value manipulation. Returns a list of
-#.png files.
+#.png files. ##############UPDATE
+
 def pdf_to_png(dpi_count, threads):
-    png_names = []
+    jpg_names = []
     for File in os.listdir("."):
         if File.endswith(".pdf"):
-            pages = convert_from_path(File, dpi=dpi_count, thread_count=threads)
+            pages = convert_from_path(File, dpi=dpi_count, thread_count=threads, use_pdftocairo=True, fmt='jpeg', jpegopt={'quality':50, 'progressive' : False, 'optimize': True})
             new_name = File[:-4]
-            for page in pages:
-                page.save('%s-page%d.png' % (new_name, pages.index(page)), 'PNG')
-                png_names.append('%s-page%d.png' % (new_name, pages.index(page)))
-    return png_names
-
-
-#Takes the list of .png's and inverts the color for each.
-#It's necessary because otherise black font wouldn't look right.
-def invert_color(pngs_white):
-    for i in range(len(pngs_white)):
-        image = cv2.imread(pngs_white[i])
-        image_inverted = cv2.bitwise_not(image)
-        cv2.imwrite(pngs_white[i], image_inverted)
-        
+            with alive_bar(total=len(pages), calibrate=1, title='Extracting images from PDF') as bar:
+                for page in pages:
+                    name = '%s-page%d.jpg' % (new_name, pages.index(page))
+                    page.save(name, 'JPEG')
+                    inverted = cv2.bitwise_not(cv2.imread(name))
+                    cv2.imwrite(name, inverted)
+                    bar()
+                        
 
 #Takes an inverted .png and converts all black pixels to grey.
 #Only takes one string at a time so that multiprocessing works.
 def black_to_grey(File):
-    start = time.time()
     color_array = cv2.imread(File)
-    length = color_array.shape[0] - 1
-    width = color_array.shape[1] - 1
-    color_array = parse.parse_png(color_array, length, width)
+    start = time.time()
+    color_array = speed(color_array)
+    print("Finished", File, "in", time.time() - start, "seconds")
     cv2.imwrite(File, color_array)
-    print(time.time() - start)
-
-
+ 
 
 #Returns a sorted list of darkmode .png files
 def darkmode_files():
@@ -108,10 +106,11 @@ def remove_temp_pdfs():
         if "temp_darkmode.pdf" in File:
             os.remove(File)
 
+
 #Simple cleanup
 def remove_pngs():
     for File in os.listdir("."):
-        if File.endswith(".png"):
+        if File.endswith(".jpg"):
             os.remove(File)
 
 
@@ -127,16 +126,12 @@ def repack(darkmode_pdfs):
 
 
 #Converts darkmode .png files to .pdf files
-def png_to_pdf(pngs_dark):
-    for x in range(len(pngs_dark)):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.image(pngs_dark[x], 0, 0, 210, 300)
-        pdf.output(pngs_dark[x][:-4] + "_temp_darkmode.pdf", "F")
-        pdf.close()
-    remove_pngs()
-    repack(get_groups(darkmode_files())) # Repacks back into PDF's
-    remove_temp_pdfs()
+def png_to_pdf(jpg):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.image(jpg, 0, 0, 210, 300)
+    pdf.output(jpg[:-4] + "_temp_darkmode.pdf", "F")
+    pdf.close()
 
 
 #Simply making a list of lists to process for multiprocessing.
@@ -152,11 +147,10 @@ def make_batches(process_list, cpus):
 # only 1 process. The speedup is based on a cpu-cores/pages-to-process
 # ratio since it converts in batches.
 def multiProcess(cpus):
-    temp_pngs = pdf_to_png(275, cpus)
-    invert_color(temp_pngs)
+    pdf_to_png(500, cpus)
     p_list = []
     for File in os.listdir("."):
-        if File.endswith(".png"):
+        if File.endswith(".jpg"):
             p = mp.Process(target=black_to_grey, args=(File, ))
             p_list.append(p)
     batch = make_batches(p_list, cpus)
@@ -166,10 +160,29 @@ def multiProcess(cpus):
             p.start()
         for p in batch[i]:
             p.join()
-    png_to_pdf(temp_pngs)
-
+    t_list = []
+    for File in os.listdir("."):
+        if File.endswith(".jpg"):
+            t = Thread(target=png_to_pdf, args=(File, ))
+            t_list.append(t)
+    batch = make_batches(t_list, cpus)
+    for i in range(len(batch)):
+        print("Batch ", i, " starting now with length", len(batch[i]))
+        for t in batch[i]:
+            t.start()
+        for t in batch[i]:
+            t.join()
+    remove_pngs()
+    repack(get_groups(darkmode_files())) # Repacks back into PDF's
+    remove_temp_pdfs()
 
 if __name__ == "__main__":
-    s = time.time()
+    '''
+    for File in os.listdir("."):
+        if File.endswith(".jpg"):
+            os.remove(File)
+    config_handler.set_global(bar='smooth', spinner='brackets')
+    '''
+    start = time.time()
     multiProcess(mp.cpu_count())
-    print("Program took", time.time() - s)
+    print(time.time() - start)
