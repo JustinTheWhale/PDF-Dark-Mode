@@ -25,3 +25,7 @@
 * #### ``` pip install -r requirements.txt ```
 * #### Move the PDF files you want converted into this directory 
 * #### Finally: ``` python pdf.py ```
+
+## Example
+![Example Input] (examples/example_input.png)
+![Example Input] (examples/example_onput.png)
