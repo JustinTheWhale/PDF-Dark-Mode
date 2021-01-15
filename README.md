@@ -27,5 +27,5 @@
 * #### Finally: ``` python pdf.py ```
 
 ## Example
-![] (examples/example_input.png)
-![] (examples/example_output.png)
+<img src="examples/example_input.png">
+<img src="examples/example_output.png">
