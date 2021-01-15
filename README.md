@@ -27,5 +27,5 @@
 * #### Finally: ``` python pdf.py ```
 
 ## Example
-![Example Input] (https://raw.githubusercontent.com/JustinMartinezCSUSB/PDF-Dark-Mode/PDF-Dark-Mode--Revised/examples/example_input.png)
-![Example Input] (https://raw.githubusercontent.com/JustinMartinezCSUSB/PDF-Dark-Mode/PDF-Dark-Mode--Revised/examples/examle_output.png)
+![] (examples/example_input.png)
+![] (examples/example_output.png)
