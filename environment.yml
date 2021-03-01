@@ -1,0 +1,53 @@
+name: PDF-Dark-Mode
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ca-certificates=2020.12.5=h5b45459_0
+  - cairo=1.16.0=hba8bd2f_1007
+  - certifi=2020.12.5=py38haa244fe_1
+  - fontconfig=2.13.1=h1989441_1004
+  - freetype=2.10.4=h546665d_1
+  - gettext=0.19.8.1=h1a89ca6_1005
+  - icu=68.1=h0e60522_0
+  - jpeg=9d=h8ffe710_0
+  - krb5=1.17.2=hbae68bd_0
+  - libcurl=7.71.1=h4b64cdc_8
+  - libffi=3.3=h0e60522_2
+  - libglib=2.66.7=h8c8e623_0
+  - libiconv=1.16=he774522_0
+  - libpng=1.6.37=h1d00b33_2
+  - libssh2=1.9.0=hb06d900_5
+  - libtiff=4.2.0=hc10be44_0
+  - libxml2=2.9.10=hf5bbc77_3
+  - lz4-c=1.9.3=h8ffe710_0
+  - openjpeg=2.4.0=h48faf41_0
+  - openssl=1.1.1j=h8ffe710_0
+  - pcre=8.44=ha925a31_0
+  - pip=21.0.1=py38haa95532_0
+  - pixman=0.40.0=h8ffe710_0
+  - poppler=21.02.0=h9ff6ed8_0
+  - poppler-data=0.4.10=0
+  - python=3.8.8=hdbf39b2_4
+  - python_abi=3.8=1_cp38
+  - setuptools=52.0.0=py38haa95532_0
+  - sqlite=3.33.0=h2a8f88b_0
+  - tk=8.6.10=h8ffe710_1
+  - vc=14.2=h21ff451_1
+  - vs2015_runtime=14.27.29016=h5e58377_2
+  - wheel=0.36.2=pyhd3eb1b0_0
+  - wincertstore=0.2=py38_0
+  - xz=5.2.5=h62dcd97_1
+  - zlib=1.2.11=h62dcd97_4
+  - zstd=1.4.8=h4e2f164_1
+  - pip:
+    - alive-progress==1.6.2
+    - fpdf==1.7.2
+    - llvmlite==0.35.0
+    - numba==0.52.0
+    - numpy==1.19.5
+    - opencv-python==4.5.1.48
+    - pdf2image==1.14.0
+    - pillow==8.1.0
+    - pypdf2==1.26.0
+prefix: C:\Users\dltmd\miniconda3\envs\PDF-Dark-Mode
