@@ -37,7 +37,7 @@ import numpy as np
 #the image to change the text from black to white
 def pdf_to_png(dpi_count, threads):
     for File in os.listdir("."):
-        if File.endswith(".pdf"):
+        if File.endswith(".pdf") and not File.endswith('_converted.pdf'):
             pages = convert_from_path(File, dpi=dpi_count, thread_count=threads, use_pdftocairo=True)
             new_name = File[:-4]
             for page in pages:
@@ -118,7 +118,7 @@ def repack(darkmode_pdfs):
         merger = PdfFileMerger()        
         for j in range(len(darkmode_pdfs[i])):
             merger.append(darkmode_pdfs[i][j])
-        merger.write(darkmode_pdfs[i][j][:-27] + "_darkmode.pdf")
+        merger.write(darkmode_pdfs[i][j][:-27] + "_converted.pdf")
         merger.close()
 
 
