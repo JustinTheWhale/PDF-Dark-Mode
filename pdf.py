@@ -1,8 +1,6 @@
-#JustinMartinezCSUSB
-
-
-#pdfdarkmode_noGUI.py
-
+# JustinMartinezCSUSB
+# The Realest One
+# sjlee1218
 
 #Program that converts all of the .pdf files
 #in the same directory to have a "Dark mode"
@@ -30,20 +28,26 @@ from PIL import Image
 from PyPDF2 import PdfFileMerger
 
 from compare import speed
-
+import numpy as np
 
 #Function that converts the individual pages in a .pdf file 
 #to .png for easier pixel value manipulation. It then iverts
 #the image to change the text from black to white
 def pdf_to_png(dpi_count, threads):
     for File in os.listdir("."):
-        if File.endswith(".pdf"):
+        if File.endswith(".pdf") and not File.endswith('_converted.pdf'):
             pages = convert_from_path(File, dpi=dpi_count, thread_count=threads, use_pdftocairo=True)
             new_name = File[:-4]
             for page in pages:
-                name = '%s-page%d.png' % (new_name, pages.index(page))
+                # name = '%s-page%d.png' % (new_name, pages.index(page))
+                name = f'{new_name}-page{str(pages.index(page)).zfill(4)}.png'
                 page.save(name, 'PNG')
-                inverted = cv2.bitwise_not(cv2.imread(name))
+                # print(np.array(cv2.imread(name)).shape)
+                # print(np.array(cv2.imread(name)))
+                # print()
+                # print()
+                # inverted = cv2.bitwise_not(cv2.imread(name))
+                inverted = np.where(cv2.imread(name) <= 140, 255, 0)
                 cv2.imwrite(name, inverted)
 
 
@@ -82,7 +86,7 @@ def get_groups (darkmode_list):
     group_list = []
     i = 0
     while i < len(darkmode_list):
-        start_end_list = get_start_end(darkmode_list, darkmode_list[i][:-24])
+        start_end_list = get_start_end(darkmode_list, darkmode_list[i][:-27])
         start = start_end_list[0]
         end = start_end_list[len(start_end_list)-1]
         i = end + 1
@@ -112,7 +116,7 @@ def repack(darkmode_pdfs):
         merger = PdfFileMerger()        
         for j in range(len(darkmode_pdfs[i])):
             merger.append(darkmode_pdfs[i][j])
-        merger.write(darkmode_pdfs[i][j][:-24] + "_darkmode.pdf")
+        merger.write(darkmode_pdfs[i][j][:-27] + "_converted.pdf")
         merger.close()
 
 
@@ -121,7 +125,7 @@ def png_to_pdf(png):
     pdf = FPDF()
     pdf.add_page()
     pdf.image(png, 0, 0, 210, 300)
-    pdf.output(png[:-4] + "_temp_darkmode.pdf", "F")
+    pdf.output(png.replace('.png', '_temp_darkmode.pdf'), "F")
     pdf.close()
 
 
@@ -139,7 +143,7 @@ def make_batches(process_list, cpus):
 # ratio since it converts in batches.
 def multiProcess(cpus):
     with alive_bar(10, title="Converting PDF's", calibrate=1) as bar_convert:
-        pdf_to_png(333, cpus) # Grab images from pdf
+        pdf_to_png(600, cpus) # Grab images from pdf
         bar_convert()
 
         # multiprocessing for conversion from black -> grey
