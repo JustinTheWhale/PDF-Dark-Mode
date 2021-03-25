@@ -1,8 +1,5 @@
 #JustinMartinezCSUSB
-
-# Poppler as conda!
-#pdfdarkmode_noGUI.py
-
+#The Realest One
 
 #Program that converts all of the .pdf files
 #in the same directory to have a "Dark mode"
