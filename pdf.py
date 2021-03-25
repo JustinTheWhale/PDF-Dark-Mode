@@ -1,5 +1,6 @@
-#JustinMartinezCSUSB
-#The Realest One
+# JustinMartinezCSUSB
+# The Realest One
+# sjlee1218
 
 #Program that converts all of the .pdf files
 #in the same directory to have a "Dark mode"
