@@ -2,7 +2,7 @@
 fpdf==1.7.2
 llvmlite==0.35.0
 numba==0.53.0
-numpy==1.19.5
+numpy==1.21.0
 opencv-python==4.5.1.48
 pdf2image==1.14.0
 Pillow==9.0.1
