@@ -1,6 +1,4 @@
 # JustinMartinezCSUSB
-# The Realest One
-# sjlee1218
 
 #Program that converts all of the .pdf files
 #in the same directory to have a "Dark mode"
@@ -19,9 +17,9 @@
 import multiprocessing as mp
 import os
 from threading import Thread
+import time
 
 import cv2
-from alive_progress import alive_bar, config_handler
 from fpdf import FPDF
 from pdf2image import convert_from_path
 from PIL import Image
@@ -36,17 +34,11 @@ import numpy as np
 def pdf_to_png(dpi_count, threads):
     for File in os.listdir("."):
         if File.endswith(".pdf") and not File.endswith('_converted.pdf'):
-            pages = convert_from_path(File, dpi=dpi_count, thread_count=threads, use_pdftocairo=True)
+            pages = convert_from_path(File, dpi=dpi_count, thread_count=threads, grayscale=True)
             new_name = File[:-4]
             for page in pages:
-                # name = '%s-page%d.png' % (new_name, pages.index(page))
                 name = f'{new_name}-page{str(pages.index(page)).zfill(4)}.png'
-                page.save(name, 'PNG')
-                # print(np.array(cv2.imread(name)).shape)
-                # print(np.array(cv2.imread(name)))
-                # print()
-                # print()
-                # inverted = cv2.bitwise_not(cv2.imread(name))
+                page.save(name, 'PNG', compress_level=1)
                 inverted = np.where(cv2.imread(name) <= 140, 255, 0)
                 cv2.imwrite(name, inverted)
 
@@ -62,10 +54,11 @@ def black_to_grey(File):
 #Returns a sorted list of darkmode .png files
 def darkmode_files():
     file_list = []
-    for File in os.listdir("."):
+    for File in sorted(os.listdir(".")):
         if "_darkmode" in File:
             file_list.append(File)
-    return sorted(file_list)
+    file_list = sorted(file_list)
+    return file_list
 
 
 #Returns a list of index's for the get_groups(arg) function
@@ -127,6 +120,7 @@ def png_to_pdf(png):
     pdf.image(png, 0, 0, 210, 300)
     pdf.output(png.replace('.png', '_temp_darkmode.pdf'), "F")
     pdf.close()
+    
 
 
 #Simply making a list of lists to process for multiprocessing.
@@ -142,9 +136,7 @@ def make_batches(process_list, cpus):
 # only 1 process. The speedup is based on a cpu-cores/pages-to-process
 # ratio since it converts in batches.
 def multiProcess(cpus):
-    with alive_bar(10, title="Converting PDF's", calibrate=1) as bar_convert:
-        pdf_to_png(600, cpus) # Grab images from pdf
-        bar_convert()
+        pdf_to_png(300, cpus) # Grab images from pdf
 
         # multiprocessing for conversion from black -> grey
         p_list = []
@@ -152,17 +144,14 @@ def multiProcess(cpus):
             if File.endswith(".png"):
                 p = mp.Process(target=black_to_grey, args=(File, ))
                 p_list.append(p)
-        bar_convert()
 
         batch = make_batches(p_list, cpus)
-        bar_convert()
 
         for i in range(len(batch)):
             for p in batch[i]:
                 p.start()
             for p in batch[i]:
                 p.join()
-        bar_convert()
 
         # multithreading for saving each image as a PDF 
         t_list = []
@@ -170,29 +159,25 @@ def multiProcess(cpus):
             if File.endswith(".png"):
                 t = Thread(target=png_to_pdf, args=(File, ))
                 t_list.append(t)
-        bar_convert()
 
         batch = make_batches(t_list, cpus)
-        bar_convert()
 
         for i in range(len(batch)):
             for t in batch[i]:
                 t.start()
             for t in batch[i]:
                 t.join()
-        bar_convert()
 
 
         remove_pngs()
-        bar_convert()
         repack(get_groups(darkmode_files())) # Repacks back into PDF's
-        bar_convert()
         remove_temp_pdfs()
-        bar_convert()
+
 
 if __name__ == "__main__":
-    config_handler.set_global(spinner='classic')
     count = mp.cpu_count()
     if count > 16:
         count = 16 # Using more than 16 cpu's might make windows explorer crash from virtual memeory
+    t = time.time()
     multiProcess(mp.cpu_count())
+    print(f"Program took: {time.time() - t}")
