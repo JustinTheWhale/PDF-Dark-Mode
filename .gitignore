@@ -1,7 +1,12 @@
 .vscode
 __pycache__
-Include
-Lib
-Scripts
+include
+lib
 LICENSE
 pyvenv.cfg
+lib64
+bin
+examples
+setup.cfg
+examples
+*pdf
