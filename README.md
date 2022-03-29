@@ -27,12 +27,3 @@
 * #### ``` pip install -r requirements.txt ```
 * #### Move the PDF files you want converted into this directory 
 * #### Finally: ``` python pdf.py ```
-
-## Example
-<img src="examples/example_input.png">
-<img src="examples/example_output.png">
-
-
-Thanks to the-realest-one and sjlee1218:
-* There was a problem that page 11 came before page 2, because of filenames. Solved by zfill
-* Made converted pdfs' white letters more clear

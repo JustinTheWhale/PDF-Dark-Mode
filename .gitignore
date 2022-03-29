@@ -8,3 +8,6 @@ bin
 setup.cfg
 examples
 *pdf
+dist
+*.egg-info
+pyproject.toml
