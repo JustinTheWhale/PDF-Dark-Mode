@@ -6,7 +6,7 @@
 
 
 ## Installation 
-* ### Windows
+### Windows
     - #### Download [poppler for Windows from here.](https://github.com/oschwartz10612/poppler-windows/releases/tag/v20.12.1-data)
     - #### Extract the folder somewhere on your PC. 
     - #### Add the path C:\<path-to-extracted-folder>\poppler-20.12.1\Library\bin in the Windows Environment PATH. 
