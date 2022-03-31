@@ -17,7 +17,7 @@
 * #### Mac users will have to install poppler for Mac. You can do so with this [homebrew formula.](https://formulae.brew.sh/formula/poppler)
 
 ### Linux
-* #### Most distributions of linux already have ```pdftoppm``` installed. If not you can check your package manager on how to install ```poppler-utils```
+* #### Most distributions of linux already have ```pdftoppm``` installed. If not you can check your package manager on how to install ```poppler-utils```.
 
 ### Then
 * #### ``` git clone https://github.com/JustinMartinezCSUSB/PDF-Dark-Mode.git ```
