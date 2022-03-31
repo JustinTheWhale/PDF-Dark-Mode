@@ -9,14 +9,14 @@
 
 ## Installation 
 * ### (Windows)
-* #### Download [poppler for Windows from here.](https://github.com/oschwartz10612/poppler-windows/releases/tag/v20.12.1-data)
-* #### Extract the folder somewhere on your PC. 
-* #### Add the path C:\<path-to-extracted-folder>\poppler-20.12.1\Library\bin in the Windows Environment PATH. 
+    - #### Download [poppler for Windows from here.](https://github.com/oschwartz10612/poppler-windows/releases/tag/v20.12.1-data)
+    - #### Extract the folder somewhere on your PC. 
+    - #### Add the path C:\<path-to-extracted-folder>\poppler-20.12.1\Library\bin in the Windows Environment PATH. 
 
-* ### (macOS)
+### (macOS)
 * #### Mac users will have to install poppler for Mac. You can do so with this [homebrew formula.](https://formulae.brew.sh/formula/poppler)
 
-* ### (Linux)
+### (Linux)
 * #### Most distributions of linux already have ```pdftoppm``` installed. If not you can check your package manager on how to install ```poppler-utils```
 
 ### Then
