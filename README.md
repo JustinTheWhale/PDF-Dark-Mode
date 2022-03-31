@@ -4,8 +4,7 @@
 
 ### _*NOTE:*_ This project is going under significant changes! Stay tuned for updates!
 
-#### This is a python program that converts the white-space in PDF files to have a grey background.
-#### This program works best with non-handwritten PDF's and PDF's without any images.
+#### This is a python program that converts the white-space in PDF files to have a grey background and works best with non-handwritten PDF's and PDF's without any images.
 
 ## Installation 
 * ### Windows
