@@ -23,3 +23,7 @@
 * #### ``` cd PDF-Dark-Mode ```
 * #### ``` pip install -r requirements.txt ```
 * #### Finally: ``` python pdf.py ```
+
+## Example
+<img src="examples/example_input.png">
+<img src="examples/example_output.png">
