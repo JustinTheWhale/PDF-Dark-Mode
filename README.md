@@ -29,6 +29,28 @@
 * #### ``` cd PDF-Dark-Mode ```
 * #### ``` pip install -r requirements.txt ```
 
+
+##Usage
+
+```python
+from PdfDarkMode.darkmode import convert
+
+convert("example.pdf")
+```
+
+#### Additionally, you can pass a list of PDF files instead of just one string like so: 
+
+```python
+
+from PdfDarkMode.darkmode import convert
+
+convert(["example.pdf", "example2.pdf", ...])
+```
+
+#### If you dont feel like importing the package (or just didn't install it with pip), you can run it directly from the command line:
+
+```python darkmode.py example.pdf example2.pdf ...```
+
 ## Example
 <img src="examples/example_input.png">
 <img src="examples/example_output.png">
