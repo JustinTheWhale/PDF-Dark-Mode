@@ -22,12 +22,12 @@
 * #### Most distributions of linux already have ```pdftoppm``` installed. If not you can check your package manager on how to install ```poppler-utils```.
 
 ### Then
-* ### _*Using pip*_
-    * #### ``` pip install PdfDarkMode ```
-* ### _*Or*_
-    * #### ``` git clone https://github.com/JustinTheWhale/PDF-Dark-Mode.git ```
-    * #### ``` cd PDF-Dark-Mode ```
-    * #### ``` pip install -r requirements.txt ```
+### _*Using pip*_
+* #### ``` pip install PdfDarkMode ```
+### _*Or*_
+* #### ``` git clone https://github.com/JustinTheWhale/PDF-Dark-Mode.git ```
+* #### ``` cd PDF-Dark-Mode ```
+* #### ``` pip install -r requirements.txt ```
 
 ## Example
 <img src="examples/example_input.png">
