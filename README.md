@@ -30,8 +30,7 @@
 * #### ``` pip install -r requirements.txt ```
 
 
-##Usage
-
+## Usage
 ```python
 from PdfDarkMode.darkmode import convert
 
