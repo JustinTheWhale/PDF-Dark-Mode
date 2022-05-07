@@ -11,3 +11,4 @@ examples
 dist
 *.egg-info
 pyproject.toml
+.pypirc
