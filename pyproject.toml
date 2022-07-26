@@ -1,3 +1,22 @@
 [build-system]
 requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+envlist = py35, py36, py37, py38, py39, py310
+
+[testenv]
+deps = 
+    opencv-python
+    numpy
+    fpdf
+    numba
+    pdf2image
+    Pillow
+    PyPDF2
+
+commands =
+    python src/PdfDarkMode/darkmode.py src/PdfDarkMode/test.pdf
+'''

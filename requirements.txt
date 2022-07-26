@@ -1,6 +1,6 @@
 fpdf==1.7.2
 llvmlite==0.38.0
-numba==0.55.1
+numba==0.55.2
 numpy==1.22.0
 opencv-python==4.5.5.64
 pdf2image==1.16.0

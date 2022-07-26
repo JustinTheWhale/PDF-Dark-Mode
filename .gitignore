@@ -12,3 +12,7 @@ dist
 *.egg-info
 pyproject.toml
 .pypirc
+Scripts
+Lib
+Include
+.tox
