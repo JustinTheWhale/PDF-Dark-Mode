@@ -8,6 +8,7 @@
 
 #### Python program that converts the white-space in PDF files to have a grey background.
 #### Works best with non-handwritten PDF's and PDF's without any images.
+#### Tested and working on Python 3.6+
 
 ## Installation 
 ### Windows
