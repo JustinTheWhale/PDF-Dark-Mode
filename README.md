@@ -6,8 +6,8 @@
 
 ### _*NOTE:*_ This project is going under significant changes! Stay tuned for updates!
 
-#### This is a python program that converts the white-space in PDF files to have a grey background.
-#### This program works best with non-handwritten PDF's and PDF's without any images.
+#### Python program that converts the white-space in PDF files to have a grey background.
+#### Works best with non-handwritten PDF's and PDF's without any images.
 
 ## Installation 
 ### Windows
@@ -19,7 +19,7 @@
 * #### Mac users will have to install poppler for Mac. You can do so with this [homebrew formula.](https://formulae.brew.sh/formula/poppler)
 
 ### Linux
-* #### Most distributions of linux already have ```pdftoppm``` installed. If not you can check your package manager on how to install ```poppler-utils```.
+* #### Most linux distros already have ```pdftoppm``` installed. If not, you can check your package manager on how to install ```poppler-utils```.
 
 ### Then
 ### _*Using pip*_
@@ -46,7 +46,7 @@ from PdfDarkMode.darkmode import convert
 convert(["example.pdf", "example2.pdf", ...])
 ```
 
-#### If you dont feel like importing the package (or just didn't install it with pip), you can run it directly from the command line:
+#### You can also run it directly from the command line:
 
 ```python darkmode.py example.pdf example2.pdf ...```
 
