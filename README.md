@@ -8,14 +8,13 @@
 
 #### Python program that converts the white-space in PDF files to have a grey background.
 #### Works best with non-handwritten PDF's and PDF's without any images.
+
 #### Tested and working on Python 3.6+.
 
 ## Installation 
 ### Windows
 - #### Requires [poppler-windows](https://https://github.com/oschwartz10612/poppler-windows) >= v20.12.1. It should work with older versions too but I haven't gone through and tested each one.
 - #### Download [poppler for Windows from here.](https://https://github.com/oschwartz10612/poppler-windows/releases/tag/v22.04.0-0)
-- #### Extract the folder somewhere on your PC. 
-- #### Add the path C:\<path-to-extracted-folder>\poppler-20.12.1\Library\bin in the Windows Environment PATH. 
 
 ### macOS
 * #### Mac users will have to install poppler for Mac. You can do so with this [homebrew formula.](https://formulae.brew.sh/formula/poppler)

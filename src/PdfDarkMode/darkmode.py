@@ -16,12 +16,13 @@ The final file is much larger than the original file
 import multiprocessing as mp
 import os
 import sys
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
+from typing import List, Union
 
 import cv2
 import numpy as np
 from fpdf import FPDF
-from numba import jit, uint8
+from numba import jit
 from pdf2image import convert_from_path
 from PIL import Image
 from PyPDF2 import PdfFileMerger
@@ -59,14 +60,8 @@ class Darkmode:
         process. Starting more processes than cpu count might lead to 
         performance regression.
     
-    make_processes():
-        Adds process objects to self.process_list.
-
     start_processes():
         Starts indiviual process objects in self.process_list.
-
-    make_threads():
-        Adds thread objects to self.thread_list.
 
     start_threads():
         Starts indiviual thread objects in self.thread_list.
@@ -90,7 +85,7 @@ class Darkmode:
         for processing.
     """
 
-    def __init__(self, pdfs=None):
+    def __init__(self, pdfs=None) -> None:
         self.threads = mp.cpu_count()
         if self.threads > 16:
             self.threads = 16
@@ -98,11 +93,9 @@ class Darkmode:
         self.pngs = []
         self.temp_pdfs = []
         self.pdf_groups = {}
-        self.process_list = []
-        self.thread_list = []
         self.batches = []
 
-    def pdf_to_png(self, dpi_count=300):
+    def pdf_to_png(self, dpi_count:int = 300) -> None:
         """
         Iterates through each pdf file in self.pdfs and separates indiviual
         pages into separate png files. The names of the png files are saved
@@ -126,7 +119,7 @@ class Darkmode:
                 inverted = np.where(cv2.imread(name) <= 140, 255, 0)
                 cv2.imwrite(name, inverted)
 
-    def make_batches(self, task_list):
+    def make_batches(self, task_list: List) -> List[List[str]]:
         """
         Makes a list of lists where len(list) does not exceed cpu count. If
         a large PDF is encountered, each page will be converted by its own
@@ -147,52 +140,31 @@ class Darkmode:
         else:
             batches = [
                 task_list[i : i + self.threads]
-                for i in range(len(task_list), self.threads)
+                for i in range(0, len(task_list), self.threads)
             ]
             return batches
 
-    def make_processes(self):
+    def start_processes(self) -> None:
         """
-        Adds process objects to self.process_list.
-        """
-        for file in self.pngs:
-            p = mp.Process(target=self.black_to_grey, args=(file,))
-            self.process_list.append(p)
-
-    def start_processes(self):
-        """
-        Starts indiviual process objects in self.process_list.
-        """
-        self.process_list = self.make_batches(self.process_list)
-        for i in range(len(self.process_list)):
-            for p in self.process_list[i]:
-                p.start()
-            for p in self.process_list[i]:
-                p.join()
-
-    def make_threads(self):
-        """
-        Adds thread objects to self.thread_list.
-        """
-        for file in self.pngs:
-            t = Thread(target=self.png_to_pdf, args=(file,))
-            self.thread_list.append(t)
-
-    def start_threads(self):
-        """
-        Starts indiviual thread objects in self.thread_list.
+        Starts indiviual process in batches to edit the color on the PNG's
         """
 
-        self.thread_list = self.make_batches(self.thread_list)
-        for i in range(len(self.thread_list)):
-            for t in self.thread_list[i]:
-                t.start()
-            for t in self.thread_list[i]:
-                t.join()
+        for batch in self.make_batches(self.pngs):
+            with mp.Pool(processes=self.threads) as pool:
+                pool.map(self.black_to_grey, batch)
+
+    def start_threads(self) -> None:
+        """
+        Starts indiviual thread to convert PNG's back into a PDF
+        """
+
+        for batch in self.make_batches(self.pngs):
+            with ThreadPoolExecutor(self.threads) as pool:
+                pool.map(self.png_to_pdf, batch)
 
     @staticmethod
     @jit(nopython=True, cache=True, fastmath={"fast"})
-    def speed(image):
+    def speed(image: np.ndarray) -> np.ndarray:
         """
         Uses numba to quickly parse image array and change pixels to grey.
 
@@ -211,7 +183,7 @@ class Darkmode:
                     image[i, j] = grey
         return image
 
-    def black_to_grey(self, file):
+    def black_to_grey(self, file: str) -> None:
         """
         Takes inverted .png image and converts all black pixels to grey.
 
@@ -224,7 +196,7 @@ class Darkmode:
         color_array = self.speed(color_array)
         cv2.imwrite(file, color_array)
 
-    def png_to_pdf(self, png):
+    def png_to_pdf(self, png: str) -> None:
         """
         Converts darkmode .png files to .pdf files. Adds temp filename to
         self.temp_pdfs after.
@@ -243,7 +215,7 @@ class Darkmode:
         self.temp_pdfs.append(name)
         os.remove(png)
 
-    def get_groups(self):
+    def get_groups(self) -> None:
         """
         Goes through temp pdf files to group PDF pages by filename.
         Changes value of self.pdfs.
@@ -262,7 +234,7 @@ class Darkmode:
                     pdfs[pdf_file] = [file]
         self.temp_pdfs = pdfs
 
-    def repack(self):
+    def repack(self) -> None:
         """
         Packs all converted pdf files into a single PDF. Uses self.temp_pdfs
         for processing.
@@ -281,7 +253,7 @@ class Darkmode:
             merger.close()
 
 
-def main(files=None):
+def main(files: Union[List, None, str] =None) -> None:
     """
     Main function, creates object and calls class methods.
 
@@ -316,9 +288,7 @@ def main(files=None):
                 darkmode_generator.pdfs.append(file)
 
     darkmode_generator.pdf_to_png()
-    darkmode_generator.make_processes()
     darkmode_generator.start_processes()
-    darkmode_generator.make_threads()
     darkmode_generator.start_threads()
     darkmode_generator.pdf_groups = darkmode_generator.get_groups()
     darkmode_generator.repack()
@@ -327,7 +297,7 @@ def main(files=None):
             os.remove(i)
 
 
-def convert(files=None):
+def convert(files=None) -> None:
     """
     Calls the main function, This is what should be called when using package.
 
@@ -338,6 +308,7 @@ def convert(files=None):
 
 
 if __name__ == "__main__":
+    mp.freeze_support()
     n = len(sys.argv)
     if n == 1:
         convert()
