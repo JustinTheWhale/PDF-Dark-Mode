@@ -25,7 +25,7 @@ from fpdf import FPDF
 from numba import jit
 from pdf2image import convert_from_path
 from PIL import Image
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfMerger
 
 
 class Darkmode:
@@ -175,12 +175,13 @@ class Darkmode:
             image (numpy.array) : Converted numpy.image array
 
         """
-
+        #high contast dark mode
+        black = np.full((3), fill_value=0, dtype=np.uint8)
         grey = np.full((3), fill_value=70, dtype=np.uint8)
         for i in range(len(image)):
             for j in range(len(image[0])):
                 if np.sum(image[i, j]) == 0:
-                    image[i, j] = grey
+                    image[i, j] = black
         return image
 
     def black_to_grey(self, file: str) -> None:
@@ -244,7 +245,7 @@ class Darkmode:
         pdfs = list(self.temp_pdfs.keys())
 
         for pdf in pdfs:
-            merger = PdfFileMerger()
+            merger = PdfMerger()
 
             for file in self.temp_pdfs[pdf]:
                 merger.append(file)
@@ -325,3 +326,4 @@ if __name__ == "__main__":
                 files.pop(i)
         if files != []:
             convert(files=files)
+
