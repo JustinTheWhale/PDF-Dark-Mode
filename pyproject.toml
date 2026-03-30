@@ -8,14 +8,14 @@ legacy_tox_ini = '''
 envlist = py35, py36, py37, py38, py39, py310
 
 [testenv]
-deps = 
-    opencv-python
-    numpy
-    fpdf
-    numba
-    pdf2image
-    Pillow
-    PyPDF2
+deps =
+    opencv-python>=4.9.0.80
+    numpy>=1.26.0
+    fpdf2>=2.7.9
+    numba>=0.59.0
+    pdf2image>=1.17.0
+    Pillow>=10.3.0
+    pypdf>=4.0.0
 
 commands =
     python src/PdfDarkMode/darkmode.py src/PdfDarkMode/test.pdf

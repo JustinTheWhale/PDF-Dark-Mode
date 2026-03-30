@@ -1,8 +1,8 @@
-fpdf==1.7.2
-llvmlite==0.38.0
-numba==0.55.2
-numpy==1.22.0
-opencv-python==4.5.5.64
-pdf2image==1.16.0
-Pillow==9.0.1
-PyPDF2==1.27.5
+fpdf2>=2.7.9
+llvmlite>=0.42.0
+numba>=0.59.0
+numpy>=1.26.0
+opencv-python>=4.9.0.80
+pdf2image>=1.17.0
+Pillow>=10.3.0
+pypdf>=4.0.0

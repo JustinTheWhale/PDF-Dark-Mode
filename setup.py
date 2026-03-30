@@ -7,6 +7,7 @@ setup(name='PdfDarkMode',
       author='JustinTheWhale',
       author_email='justinraymen@gmail.com',
       url='https://github.com/JustinTheWhale/PDF-Dark-Mode',
-      install_requires=['opencv-python', 'numpy', 'fpdf', 'numba',
-                'pdf2image', 'Pillow', 'PyPDF2']
+      install_requires=['opencv-python>=4.9.0.80', 'numpy>=1.26.0', 'fpdf2>=2.7.9',
+                'numba>=0.59.0', 'pdf2image>=1.17.0', 'Pillow>=10.3.0',
+                'pypdf>=4.0.0']
      )
