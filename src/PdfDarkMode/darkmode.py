@@ -13,10 +13,13 @@ Might take a while depending on how large your .pdf(s) is/are
 The final file is much larger than the original file
 """
 
+import argparse
 import multiprocessing as mp
 import os
-import sys
+import shutil
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import List, Union
 
 import cv2
@@ -25,7 +28,7 @@ from fpdf import FPDF
 from numba import jit
 from pdf2image import convert_from_path
 from PIL import Image
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfMerger
 
 
 class Darkmode:
@@ -42,7 +45,7 @@ class Darkmode:
     temp_pdfs : list[str]
         A list of string(s) of temp_pdf files to process.
     pdf_groups : dict{str : [str]}
-        A dict conatining the base filename for a pdf and a list of its 
+        A dict conatining the base filename for a pdf and a list of its
         converted pages.
     batches : list[list]
         A list of lists to distribute the processing evenly on the CPU.
@@ -57,9 +60,9 @@ class Darkmode:
     make_batches(task_list):
         Makes a list of lists where len(list) does not exceed cpu count. If
         a large PDF is encountered, each page will be converted by its own
-        process. Starting more processes than cpu count might lead to 
+        process. Starting more processes than cpu count might lead to
         performance regression.
-    
+
     start_processes():
         Starts indiviual process objects in self.process_list.
 
@@ -79,7 +82,7 @@ class Darkmode:
     get_groups():
         Goes through temp pdf files to group PDF pages by filename.
         Changes value of self.pdfs.
-    
+
     repack(self):
         Packs all converted pdf files into a single PDF. Uses self.temp_pdfs
         for processing.
@@ -94,6 +97,7 @@ class Darkmode:
         self.temp_pdfs = []
         self.pdf_groups = {}
         self.batches = []
+        self._temp_dir = Path(tempfile.mkdtemp(prefix="pdf_darkmode_"))
 
     def pdf_to_png(self, dpi_count:int = 300) -> None:
         """
@@ -110,10 +114,10 @@ class Darkmode:
             pages = convert_from_path(
                 file, dpi=dpi_count, thread_count=self.threads, grayscale=True
             )
-            new_name = file[:-4]
+            base_name = Path(file).stem
 
             for page in pages:
-                name = f"{new_name}-page{str(pages.index(page)).zfill(4)}.png"
+                name = str(self._temp_dir / f"{base_name}-page{str(pages.index(page)).zfill(4)}.png")
                 self.pngs.append(name)
                 page.save(name, "PNG", compress_level=1)
                 inverted = np.where(cv2.imread(name) <= 140, 255, 0)
@@ -123,8 +127,8 @@ class Darkmode:
         """
         Makes a list of lists where len(list) does not exceed cpu count. If
         a large PDF is encountered, each page will be converted by its own
-        process. Starting more processes than cpu count might lead to 
-        performance regression. 
+        process. Starting more processes than cpu count might lead to
+        performance regression.
 
         Arguments:
             task_list (list): List of threads/processes.
@@ -210,8 +214,7 @@ class Darkmode:
         pdf.add_page()
         pdf.image(png, 0, 0, 210, 300)
         name = png.replace(".png", "_temp_darkmode.pdf")
-        pdf.output(name, "F")
-        pdf.close()
+        pdf.output(name)
         self.temp_pdfs.append(name)
         os.remove(png)
 
@@ -225,8 +228,7 @@ class Darkmode:
         pdfs = {}
         for file in sorted(self.temp_pdfs):
             if file.endswith(".pdf") and "darkmode" in file:
-
-                pdf_file = file.split("-")[0]
+                pdf_file = Path(file).name.split("-")[0]
                 if pdf_file in pdfs:
                     pdfs[pdf_file].append(file)
 
@@ -244,13 +246,22 @@ class Darkmode:
         pdfs = list(self.temp_pdfs.keys())
 
         for pdf in pdfs:
-            merger = PdfFileMerger()
+            merger = PdfMerger()
 
             for file in self.temp_pdfs[pdf]:
                 merger.append(file)
             name = f"{pdf}_converted.pdf"
             merger.write(name)
             merger.close()
+
+
+def _is_valid_pdf(filepath: str) -> bool:
+    """Check that a file starts with the PDF magic bytes."""
+    try:
+        with open(filepath, "rb") as f:
+            return f.read(4) == b"%PDF"
+    except (OSError, IOError):
+        return False
 
 
 def main(files: Union[List, None, str] =None) -> None:
@@ -262,39 +273,49 @@ def main(files: Union[List, None, str] =None) -> None:
 
     """
     darkmode_generator = Darkmode()
-    if files is not None:
-        if isinstance(files, list) and files != []:
-            for file in files:
-                if not os.path.exists(file):
-                    print(f"Can't find {file} with the given path, exiting!")
-                    return
-                else:
-                    darkmode_generator.pdfs.append(file)
+    try:
+        if files is not None:
+            if isinstance(files, list) and files != []:
+                for file in files:
+                    resolved = Path(file).resolve()
+                    if not resolved.is_file():
+                        print(f"Can't find {file} with the given path, exiting!")
+                        return
+                    if not _is_valid_pdf(str(resolved)):
+                        print(f"{file} is not a valid PDF file, exiting!")
+                        return
+                    darkmode_generator.pdfs.append(str(resolved))
 
-        elif isinstance(files, str):
-            if os.path.exists(files):
-                darkmode_generator.pdfs = [files]
+            elif isinstance(files, str):
+                resolved = Path(files).resolve()
+                if resolved.is_file():
+                    if not _is_valid_pdf(str(resolved)):
+                        print(f"{files} is not a valid PDF file, exiting!")
+                        return
+                    darkmode_generator.pdfs = [str(resolved)]
+                else:
+                    print(f"Can't find {files} with the given path, exiting!")
+                    return
             else:
-                print(f"Can't find {files} with the given path, exiting!")
+                print("Invalid file type detected, exiting!")
                 return
         else:
-            print("Invalid file type detected, exiting!")
-            return
-    else:
-        # This does all
-        darkmode_generator.pdfs = []
-        for file in os.listdir("."):
-            if file.endswith(".pdf") and "_converted" not in file:
-                darkmode_generator.pdfs.append(file)
+            for file in os.listdir("."):
+                if file.endswith(".pdf") and "_converted" not in file:
+                    resolved = Path(file).resolve()
+                    if _is_valid_pdf(str(resolved)):
+                        darkmode_generator.pdfs.append(str(resolved))
 
-    darkmode_generator.pdf_to_png()
-    darkmode_generator.start_processes()
-    darkmode_generator.start_threads()
-    darkmode_generator.pdf_groups = darkmode_generator.get_groups()
-    darkmode_generator.repack()
-    for item in darkmode_generator.temp_pdfs.values():
-        for i in item:
-            os.remove(i)
+        darkmode_generator.pdf_to_png()
+        darkmode_generator.start_processes()
+        darkmode_generator.start_threads()
+        darkmode_generator.pdf_groups = darkmode_generator.get_groups()
+        darkmode_generator.repack()
+        for item in darkmode_generator.temp_pdfs.values():
+            for i in item:
+                os.remove(i)
+    finally:
+        shutil.rmtree(darkmode_generator._temp_dir, ignore_errors=True)
 
 
 def convert(files=None) -> None:
@@ -309,19 +330,17 @@ def convert(files=None) -> None:
 
 if __name__ == "__main__":
     mp.freeze_support()
-    n = len(sys.argv)
-    if n == 1:
-        convert()
-    elif n == 2:
-        if "pdf" in sys.argv[1]:
-            convert(files=sys.argv[1])
+    parser = argparse.ArgumentParser(
+        description="Convert PDF files to dark mode (grey background)"
+    )
+    parser.add_argument(
+        "files",
+        nargs="*",
+        help="PDF file(s) to convert. If omitted, converts all PDFs in the current directory.",
+    )
+    args = parser.parse_args()
+
+    if args.files:
+        convert(files=args.files if len(args.files) > 1 else args.files[0])
     else:
-        files = sys.argv
-        files.pop(0)
-        for i in range(len(files)):
-            if "pdf" in files[i]:
-                pass
-            else:
-                files.pop(i)
-        if files != []:
-            convert(files=files)
+        convert()
